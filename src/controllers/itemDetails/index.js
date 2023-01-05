@@ -411,6 +411,11 @@ function reloadUserDataButtons(page, item) {
             btnUserRating.setItem(null);
         }
     }
+
+    const btnJumpToUnwatched = page.querySelector('.btnJumpToUnwatched');
+    if (item.Type === 'Season' && item.UserData.UnplayedItemCount > 0) {
+        btnJumpToUnwatched.classList.remove('hide');
+    }
 }
 
 function getArtistLinksHtml(artists, serverId, context) {
@@ -1994,6 +1999,21 @@ export default function (view, params) {
         }]);
     }
 
+    function onJumpToUnwatchedClick() {
+        const vh = Math.max(document.documentElement.clientHeight || 0, window.innerHeight || 0);
+        const offsetPercent = 0.25;
+        const animationDuration = 250;
+
+        // get all unwatched episodes (by the icon), in the current page
+        // (there may be many #itemDetailPage pages if user navigated through different seasons of tv shows, but there is only one in focus)
+        const elems = $('.itemDetailPage:not(.hide) .playstatebutton-icon-unplayed');
+        if (elems.length > 1) {
+            $([document.documentElement, document.body]).animate({
+                scrollTop: $(elems[1]).offset().top - (vh * offsetPercent)
+            }, animationDuration);
+        }
+    }
+
     function onMoreCommandsClick() {
         const button = this;
         let selectedItem = view.querySelector('.selectSource').value || currentItem.Id;
@@ -2052,6 +2072,7 @@ export default function (view, params) {
         bindAll(view, '.btnCancelSeriesTimer', 'click', onCancelSeriesTimerClick);
         bindAll(view, '.btnCancelTimer', 'click', onCancelTimerClick);
         bindAll(view, '.btnDownload', 'click', onDownloadClick);
+        bindAll(view, '.btnJumpToUnwatched', 'click', onJumpToUnwatchedClick);
         view.querySelector('.detailImageContainer').addEventListener('click', onPlayClick);
         view.querySelector('.trackSelections').addEventListener('submit', onTrackSelectionsSubmit);
         view.querySelector('.btnSplitVersions').addEventListener('click', function () {
